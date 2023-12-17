@@ -1,0 +1,61 @@
+@media (min-width: 200px) {
+    .form_wrapper_login {
+      margin-top: 30%;
+      background-color: white;
+      border-radius: 10px;
+      width: 100%;
+      box-shadow: inset;
+      -webkit-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      -moz-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      padding-bottom: 2%;
+    }
+  }
+  @media (min-width: 320px) {
+    .form_wrapper_login {
+      margin-top: 30%;
+      background-color: white;
+      border-radius: 10px;
+      width: 85%;
+      box-shadow: inset;
+      -webkit-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      -moz-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      padding-bottom: 2%;
+    }
+  }
+  @media (min-width: 500px) {
+    .form_wrapper_login {
+      margin-top: 12%;
+      background-color: white;
+      border-radius: 10px;
+      width: 55%;
+      box-shadow: inset;
+      -webkit-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      -moz-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      padding-bottom: 2%;
+    }
+  }
+  @media (min-width: 800px) {
+    .form_wrapper_login {
+      margin-top: 10%;
+      background-color: white;
+      border-radius: 10px;
+      width: 40%;
+      box-shadow: inset;
+      -webkit-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      -moz-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      padding-bottom: 2%;
+    }
+  }
+  @media (min-width: 1200px) {
+    .form_wrapper_login {
+      margin-top: 10%;
+      background-color: white;
+      border-radius: 10px;
+      width: 30%;
+      box-shadow: inset;
+      -webkit-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      -moz-box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+      padding-bottom: 2%;
+    }
+  }
+  
