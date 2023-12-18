@@ -12,10 +12,10 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Box,
 } from "@mui/material";
 import WrapperDiv from "@/components/layout/WrapperDiv";
 import { useForm, Controller } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 const roles = ["User", "Itinerant Buyer"];
 const steps = ["step1", "step2", "step3"];
@@ -33,103 +33,101 @@ const fields = {
   ],
 };
 
-const UserForm = ({ register, errors, isSubmitted }) => {
-  return (
-    <>
-      <TextField
-        label="First Name"
-        fullWidth
-        margin="normal"
-        {...register("firstName", { required: "First Name is required" })}
-      />
-      {errors.firstName && isSubmitted && (
-        <Typography color="error">{errors.firstName.message}</Typography>
-      )}
+const FormField = ({ label, register, error, isSubmitted, ...props }) => (
+  <>
+    <TextField
+      label={label}
+      fullWidth
+      margin="normal"
+      {...register(label, { required: `${label} is required`, ...props })}
+    />
+    {error && isSubmitted && (
+      <Typography color="error">{error.message}</Typography>
+    )}
+  </>
+);
 
-      <TextField
-        label="Last Name"
-        fullWidth
-        margin="normal"
-        {...register("lastName", { required: "Last Name is required" })}
+const SelectField = ({ label, control, error, options, ...props }) => (
+  <>
+    <FormControl fullWidth margin="normal">
+      <InputLabel>{label}</InputLabel>
+      <Controller
+        name={label.toLowerCase()}
+        control={control}
+        defaultValue=""
+        rules={{ required: `${label} is required` }}
+        render={({ field }) => (
+          <Select {...field}>
+            {options.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </Select>
+        )}
       />
-      {errors.lastName && isSubmitted && (
-        <Typography color="error">{errors.lastName.message}</Typography>
-      )}
+    </FormControl>
+    {error && <Typography color="error">{error.message}</Typography>}
+  </>
+);
 
-      <TextField
-        label="Contact"
-        fullWidth
-        margin="normal"
-        {...register("contact", { required: "Contact is required" })}
-      />
-      {errors.contact && isSubmitted && (
-        <Typography color="error">{errors.contact.message}</Typography>
-      )}
+const UserForm = ({ register, errors, isSubmitted }) => (
+  <>
+    <FormField
+      label="First Name"
+      register={register}
+      error={errors.firstName}
+      isSubmitted={isSubmitted}
+    />
+    <FormField
+      label="Last Name"
+      register={register}
+      error={errors.lastName}
+      isSubmitted={isSubmitted}
+    />
+    <FormField
+      label="Contact"
+      register={register}
+      error={errors.contact}
+      isSubmitted={isSubmitted}
+    />
+    <FormField
+      label="Location"
+      register={register}
+      error={errors.location}
+      isSubmitted={isSubmitted}
+    />
+  </>
+);
 
-      <TextField
-        label="Location"
-        fullWidth
-        margin="normal"
-        {...register("location", { required: "Location is required" })}
-      />
-      {errors.location && isSubmitted && (
-        <Typography color="error">{errors.location.message}</Typography>
-      )}
-    </>
-  );
-};
-
-const ItinerantBuyerForm = ({ register, control, errors, isSubmitted }) => {
-  return (
-    <>
-      <TextField
-        label="Company Name"
-        fullWidth
-        margin="normal"
-        {...register("companyName", { required: "Company Name is required" })}
-      />
-      {errors.companyName && isSubmitted && (
-        <Typography color="error">{errors.companyName.message}</Typography>
-      )}
-
-      <TextField
-        label="Location"
-        fullWidth
-        margin="normal"
-        {...register("buyerLocation", { required: "Location is required" })}
-      />
-      {errors.buyerLocation && isSubmitted && (
-        <Typography color="error">{errors.buyerLocation.message}</Typography>
-      )}
-
-      <TextField
-        label="PAN Number"
-        fullWidth
-        margin="normal"
-        {...register("panNumber", { required: "PAN Number is required" })}
-      />
-      {errors.panNumber && isSubmitted && (
-        <Typography color="error">{errors.panNumber.message}</Typography>
-      )}
-
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Select Vehicle</InputLabel>
-        <Controller
-          name="vehicle"
-          control={control}
-          defaultValue=""
-          rules={{ required: "Vehicle is required" }}
-          render={({ field }) => (
-            <Select {...field}>
-              <MenuItem value="car">Car</MenuItem>
-              <MenuItem value="bike">Bike</MenuItem>
-            </Select>
-          )}
-        />
-      </FormControl>
-    </>
-  );
-};
+const ItinerantBuyerForm = ({ register, control, errors, isSubmitted }) => (
+  <>
+    <FormField
+      label="Company Name"
+      register={register}
+      error={errors.companyName}
+      isSubmitted={isSubmitted}
+    />
+    <FormField
+      label="Location"
+      register={register}
+      error={errors.buyerLocation}
+      isSubmitted={isSubmitted}
+    />
+    <FormField
+      label="PAN Number"
+      register={register}
+      error={errors.panNumber}
+      isSubmitted={isSubmitted}
+    />
+    <SelectField
+      label="Select Vehicle"
+      control={control}
+      error={errors.vehicle}
+      options={["car", "bike"]}
+    />
+  </>
+);
 
 const getStepContent = (
   handleRoleChange,
@@ -138,72 +136,48 @@ const getStepContent = (
   register,
   control,
   errors,
-  touchedFields,
   isSubmitted
 ) => {
   switch (step) {
     case 0:
       return (
         <>
-          <TextField
+          <FormField
             label="Email"
-            fullWidth
-            margin="normal"
-            {...register("email", {
-              required: "Email is required",
-              pattern: /^\S+@\S+$/i,
-            })}
+            register={register}
+            error={errors.email}
+            isSubmitted={isSubmitted}
+            pattern={/^\S+@\S+$/i}
           />
-          {errors.email && (
-            <Typography color="error">{errors.email.message}</Typography>
-          )}
-
-          <TextField
+          <FormField
             type="password"
             label="Password"
-            fullWidth
-            margin="normal"
-            {...register("password", { required: "Password is required" })}
+            register={register}
+            error={errors.password}
+            isSubmitted={isSubmitted}
           />
-          {errors.password && (
-            <Typography color="error">{errors.password.message}</Typography>
-          )}
-
-          <TextField
+          <FormField
             type="password"
             label="Confirm Password"
-            fullWidth
-            margin="normal"
-            {...register("confirmPassword", {
-              required: "Confirm Password is required",
-            })}
+            register={register}
+            error={errors.confirmPassword}
+            isSubmitted={isSubmitted}
           />
-          {errors.confirmPassword && (
-            <Typography color="error">
-              {errors.confirmPassword.message}
-            </Typography>
-          )}
-          <FormControl fullWidth margin="normal">
-            <Select value={selectedRole} onChange={handleRoleChange}>
-              {roles.map((role) => (
-                <MenuItem key={role} value={role}>
-                  {role}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.role && (
-              <Typography color="error">{errors.role.message}</Typography>
-            )}
-          </FormControl>
+          <SelectField
+            label="Role"
+            control={control}
+            error={errors.role}
+            options={roles}
+            onChange={handleRoleChange}
+            value={selectedRole}
+          />
         </>
       );
     case 1:
       return selectedRole === "User" ? (
         <UserForm
           register={register}
-          control={control}
           errors={errors}
-          touchedFields={touchedFields}
           isSubmitted={isSubmitted}
         />
       ) : (
@@ -211,7 +185,7 @@ const getStepContent = (
           register={register}
           control={control}
           errors={errors}
-          touchedFields={touchedFields}
+          isSubmitted={isSubmitted}
         />
       );
     default:
@@ -220,6 +194,7 @@ const getStepContent = (
 };
 
 const StepperForm = () => {
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [selectedRole, setSelectedRole] = useState(roles[0]);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -227,7 +202,7 @@ const StepperForm = () => {
     register,
     handleSubmit,
     control,
-    formState: { errors, touchedFields },
+    formState: { errors },
     trigger,
   } = useForm();
 
@@ -235,11 +210,9 @@ const StepperForm = () => {
     const currentStepName = steps[activeStep];
     const currentStepFields = fields[currentStepName];
 
-    // Trigger validation for the current step fields
     const isValid = await trigger(currentStepFields);
 
     if (isValid) {
-      // If the current step fields are valid, go to the next step
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
@@ -249,7 +222,6 @@ const StepperForm = () => {
   };
 
   const handleRoleChange = (event) => {
-    console.log("selected role", event.target.value);
     setSelectedRole(event.target.value);
   };
 
@@ -259,11 +231,12 @@ const StepperForm = () => {
   };
 
   const handleFinish = async (e) => {
-    e.preventDefault(); // Prevent the form from being submitted
-    const isValid = await trigger(fields[steps[activeStep]]); // Validate the current step fields
+    e.preventDefault();
+    const isValid = await trigger(fields[steps[activeStep]]);
 
     if (isValid) {
-      handleSubmit(onSubmit)(); // Submit the form
+      handleSubmit(onSubmit)();
+      router.push("/login");
     }
   };
 
@@ -303,7 +276,6 @@ const StepperForm = () => {
                   register,
                   control,
                   errors,
-                  touchedFields,
                   isSubmitted
                 )}
                 <div className="pt-4 flex items-center justify-center gap-5">

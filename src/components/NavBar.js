@@ -160,13 +160,13 @@ function ResponsiveAppBar() {
         </Box>
 
         <Box sx={{ flexGrow: 0 }}>
-          <Tooltip title="Login/Sign Out">
+          <Tooltip title="Login/Register">
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
               <Avatar alt="User Avatar" src="/static/images/avatar.jpg" />
             </IconButton>
           </Tooltip>
           <Menu
-            sx={{ mt: "45px" }}
+            sx={{ mt: "45px"}}
             id="menu-appbar"
             anchorEl={anchorElUser}
             anchorOrigin={{
@@ -181,14 +181,14 @@ function ResponsiveAppBar() {
             open={Boolean(anchorElUser)}
             onClose={handleCloseUserMenu}
           >
-            <MenuItem key="Login" onClick={handleCloseUserMenu}>
+            <MenuItem key="Login"  onClick={handleCloseUserMenu}>
               <Link href="/login">
                 <Typography textAlign="center">Login</Typography>
               </Link>
             </MenuItem>
-            <MenuItem key="SignOut" onClick={handleCloseUserMenu}>
+            <MenuItem key="Register"  onClick={handleCloseUserMenu}>
               <Link href="/register">
-                <Typography textAlign="center">Sign Out</Typography>
+                <Typography textAlign="center">Register</Typography>
               </Link>
             </MenuItem>
           </Menu>
