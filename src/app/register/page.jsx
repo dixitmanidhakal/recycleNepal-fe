@@ -12,12 +12,18 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Grid,
 } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 import WrapperDiv from "@/components/layout/WrapperDiv";
 import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import handleRequest from "@/services/apiHandler";
+import { registerRoute } from "@/services/routes/auth";
+import { Link } from "react-scroll";
 
-const roles = ["User", "Itinerant Buyer"];
 const steps = ["step1", "step2", "step3"];
 const fields = {
   step1: ["email", "password", "confirmPassword", "role"],
@@ -163,14 +169,18 @@ const getStepContent = (
             error={errors.confirmPassword}
             isSubmitted={isSubmitted}
           />
-          <SelectField
-            label="Role"
+          <Select
+            sx={{ marginTop: "8px" }}
+            fullWidth
+            label="Age"
             control={control}
             error={errors.role}
-            options={roles}
             onChange={handleRoleChange}
             value={selectedRole}
-          />
+          >
+            <MenuItem value="User">User</MenuItem>
+            <MenuItem value="Itinerant Buyers">Itenirant Buyers </MenuItem>
+          </Select>
         </>
       );
     case 1:
@@ -196,8 +206,10 @@ const getStepContent = (
 const StepperForm = () => {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
-  const [selectedRole, setSelectedRole] = useState(roles[0]);
+  const [selectedRole, setSelectedRole] = useState("User");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
@@ -225,9 +237,64 @@ const StepperForm = () => {
     setSelectedRole(event.target.value);
   };
 
+  const { mutate } = useMutation({
+    mutationFn: async (data) => {
+      queryClient.invalidateQueries({ queryKey: [""] });
+
+      await handleRequest(registerRoute, "POST", data);
+    },
+    onSuccess: () => {
+      setIsSubmitted(true);
+    },
+  });
+
   const onSubmit = (data) => {
-    setIsSubmitted(true);
-    console.log("submitted data", data);
+    console.log("form data", data);
+    const {
+      Email: email,
+      Password: password,
+      "Confirm Password": confirmPassword,
+      selectedRole: role,
+      "Company Name": company,
+      Location: location,
+      "PAN Number": PAN,
+      "select vehicle": vehicle,
+      "First Name": firstName,
+      "Last Name": lastName,
+      Contact: contact,
+    } = data;
+
+    let formattedData;
+
+    if (selectedRole === "Itinerant Buyers") {
+      formattedData = {
+        email,
+        password,
+        password_confirm: confirmPassword,
+        role: selectedRole,
+        otherFields: {
+          company,
+          location,
+          PAN,
+          vehicle,
+        },
+      };
+    } else if (selectedRole === "User") {
+      formattedData = {
+        email,
+        password,
+        password_confirm: confirmPassword,
+        role: selectedRole,
+        otherFields: {
+          firstName,
+          lastName,
+          contact,
+          location,
+        },
+      };
+    }
+    mutate(formattedData);
+    console.log("data", formattedData);
   };
 
   const handleFinish = async (e) => {
@@ -238,6 +305,10 @@ const StepperForm = () => {
       handleSubmit(onSubmit)();
       router.push("/login");
     }
+  };
+
+  const onButtonClick = () => {
+    router.push("/login");
   };
 
   return (
@@ -313,6 +384,22 @@ const StepperForm = () => {
               </>
             )}
           </div>
+          <Grid className="mt-4">
+            <Button
+              onClick={onButtonClick}
+              sx={{
+                fontSize: "13px", // Adjust the font size as needed
+                color: "#008080", // Your desired text color
+                textDecoration: "none",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              <ArrowBackIcon fontSize="small" />
+              Back to Login
+            </Button>
+          </Grid>
         </form>
       </WrapperDiv>
     </div>

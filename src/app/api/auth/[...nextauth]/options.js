@@ -1,16 +1,15 @@
-import { login } from '@/services/routes/auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import { login, loginRoute } from "@/services/routes/auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import handleRequest from "@/services/apiHandler";
 
-
-
-export const option = {
+export const options = {
   providers: [
     CredentialsProvider({
-      name: 'credentials',
+      name: "credentials",
       credentials: {},
 
       async authorize(credentials) {
-        const { email, password } = credentials ;
+        const { email, password } = credentials;
         const user = await login({ email, password });
 
         if (!user) {
@@ -30,11 +29,11 @@ export const option = {
     },
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 2 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
 };

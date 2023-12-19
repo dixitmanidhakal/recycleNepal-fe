@@ -27,7 +27,7 @@ export default function LoginForm() {
         console.log(res.error);
         return;
       }
-      router.push("/");
+      router.push("/home");
     } catch (error) {
       console.log(error);
     }
@@ -103,6 +103,14 @@ export default function LoginForm() {
           className="text-sm text-teal-600 hover:underline"
         >
           Forgot your password?
+        </Link>
+      </Grid>
+      <Grid className="mt-1">
+        <Link
+          href="/register"
+          className="text-sm text-teal-600 hover:underline"
+        >
+          Reister here
         </Link>
       </Grid>
       <Grid className="mt-3">
