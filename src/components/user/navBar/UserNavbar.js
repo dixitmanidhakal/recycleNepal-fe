@@ -18,7 +18,7 @@ import ColorPalette from "@/utilis/colorPalette.";
 import AddToCart from "@/components/addToCart/AddToCart";
 
 export default function UserNavBar(props) {
-  const [addToCartOpen, setAddToCartOpen] = React.useState(true);
+  const [addToCartOpen, setAddToCartOpen] = React.useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
