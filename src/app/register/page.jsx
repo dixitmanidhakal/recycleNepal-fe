@@ -23,6 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import handleRequest from "@/services/apiHandler";
 import { registerRoute } from "@/services/routes/auth";
 import { Link } from "react-scroll";
+import { signIn } from "next-auth/react";
 
 const steps = ["step1", "step2", "step3"];
 const fields = {
@@ -237,7 +238,7 @@ const StepperForm = () => {
     setSelectedRole(event.target.value);
   };
 
-  const { mutate } = useMutation({
+  const { mutate, error } = useMutation({
     mutationFn: async (data) => {
       queryClient.invalidateQueries({ queryKey: [""] });
 
@@ -245,56 +246,89 @@ const StepperForm = () => {
     },
     onSuccess: () => {
       setIsSubmitted(true);
+      router.push("/login");
     },
   });
 
-  const onSubmit = (data) => {
-    console.log("form data", data);
-    const {
-      Email: email,
-      Password: password,
-      "Confirm Password": confirmPassword,
-      selectedRole: role,
-      "Company Name": company,
-      Location: location,
-      "PAN Number": PAN,
-      "select vehicle": vehicle,
-      "First Name": firstName,
-      "Last Name": lastName,
-      Contact: contact,
-    } = data;
+  // ... (other imports)
 
-    let formattedData;
+  const onSubmit = async (data) => {
+    try {
+      console.log("form data", data);
 
-    if (selectedRole === "Itinerant Buyers") {
-      formattedData = {
-        email,
-        password,
-        password_confirm: confirmPassword,
-        role: selectedRole,
-        otherFields: {
-          company,
-          location,
-          PAN,
-          vehicle,
-        },
-      };
-    } else if (selectedRole === "User") {
-      formattedData = {
-        email,
-        password,
-        password_confirm: confirmPassword,
-        role: selectedRole,
-        otherFields: {
-          firstName,
-          lastName,
-          contact,
-          location,
-        },
-      };
+      const {
+        Email: email,
+        Password: password,
+        "Confirm Password": confirmPassword,
+        selectedRole: role,
+        "Company Name": company,
+        Location: location,
+        "PAN Number": PAN,
+        "select vehicle": vehicle,
+        "First Name": firstName,
+        "Last Name": lastName,
+        Contact: contact,
+      } = data;
+
+      let formattedData;
+
+      if (selectedRole === "Itinerant Buyers") {
+        formattedData = {
+          email,
+          password,
+          password_confirm: confirmPassword,
+          role: selectedRole,
+          otherFields: {
+            company,
+            location,
+            PAN,
+            vehicle,
+          },
+        };
+      } else if (selectedRole === "User") {
+        formattedData = {
+          email,
+          password,
+          password_confirm: confirmPassword,
+          role: selectedRole,
+          otherFields: {
+            firstName,
+            lastName,
+            contact,
+            location,
+          },
+        };
+      }
+
+      // Make the registration request
+      const registrationResult = await mutate(formattedData);
+
+      // Check if registration was successful
+      if (registrationResult.data) {
+        // Update the session with the new token
+        const signInResult = await signIn("credentials", {
+          ...data, // You may need to adjust this based on your actual data structure
+          redirect: false,
+        });
+
+        // Check if signIn was successful
+        if (signInResult.data) {
+          console.log("New token after registration:", signInResult.data);
+          // Optionally, you can redirect the user or perform other actions here
+        } else {
+          console.error(
+            "Sign in after registration failed:",
+            signInResult.error
+          );
+        }
+      } else {
+        console.error("Registration failed:", registrationResult.error);
+      }
+
+      console.log("data", formattedData);
+    } catch (error) {
+      console.error("Error during registration:", error);
     }
-    mutate(formattedData);
-    console.log("data", formattedData);
   };
 
   const handleFinish = async (e) => {
@@ -303,13 +337,11 @@ const StepperForm = () => {
 
     if (isValid) {
       handleSubmit(onSubmit)();
-      router.push("/login");
+      // router.push("/login");
     }
   };
 
-  const onButtonClick = () => {
-    router.push("/login");
-  };
+  const onButtonClick = () => {};
 
   return (
     <div className="flex flex-col items-center text-center justify-center ">
@@ -380,6 +412,9 @@ const StepperForm = () => {
                   >
                     {activeStep === 1 ? "Finish" : "Next"}
                   </Button>
+                  {error && (
+                    <div className="text-red-600">User already exists </div>
+                  )}
                 </div>
               </>
             )}

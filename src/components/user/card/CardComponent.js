@@ -23,11 +23,13 @@ function CardComponent({ image, title, description, cost }) {
         display: "flex-col",
         alignItems: "center",
         justifyContent: "center",
+        maxHeight: "550px",
+        paddingBottom: "20px",
       }}
     >
       <CardActionArea>
-        <div className="flex justify-center">
-          <Image src={image} height={300} width={300} alt="card image" />
+        <div className="flex justify-center max-h-52">
+          <Image src={image} height={50} width={300} alt="card image" />
         </div>
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">

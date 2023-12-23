@@ -7,6 +7,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 export default function LoginForm() {
   const {
@@ -14,6 +15,8 @@ export default function LoginForm() {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  const { data: session } = useSession();
 
   const router = useRouter();
   const onSubmit = async (data, e) => {
@@ -27,7 +30,15 @@ export default function LoginForm() {
         console.log(res.error);
         return;
       }
-      router.push("/home");
+      if (session && session.user && session.user.role) {
+        if (session.user.role === "User") {
+          router.push("/user");
+          return;
+        }
+        if (session.user.role === "Itinerant Buyers") {
+          router.push("/buyers");
+        }
+      }
     } catch (error) {
       console.log(error);
     }

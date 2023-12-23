@@ -1,9 +1,10 @@
+"use client";
+
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -15,10 +16,14 @@ import { signOut } from "next-auth/react";
 
 import { Badge } from "@mui/material";
 import ColorPalette from "@/utilis/colorPalette.";
-import AddToCart from "@/components/addToCart/AddToCart";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function UserNavBar(props) {
-  const [addToCartOpen, setAddToCartOpen] = React.useState(false);
+  const router = useRouter();
+  const [isAddToCartPage, setIsAddToCartPage] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -26,17 +31,25 @@ export default function UserNavBar(props) {
 
   const signOutClick = () => {
     signOut();
+    sessionStorage.removeItem("role");
   };
+
+  useEffect(() => {
+    const checkPathname = () => {
+      setIsAddToCartPage(window.location.pathname === "/user/add-to-cart");
+    };
+
+    checkPathname();
+
+    window.addEventListener("popstate", checkPathname);
+
+    return () => {
+      window.removeEventListener("popstate", checkPathname);
+    };
+  }, []);
 
   return (
     <div>
-      {addToCartOpen && (
-        <AddToCart
-          modalOpen={addToCartOpen}
-          onClose={() => addToCartOpen(false)}
-          setModalOpen={setAddToCartOpen}
-        />
-      )}
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <AppBar component="nav" sx={{ padding: 2, backgroundColor: "#008080" }}>
@@ -73,20 +86,37 @@ export default function UserNavBar(props) {
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: "40px" }}>
-              <IconButton
-                size="large"
-                aria-label="show 4 new mails"
-                color="inherit"
-                sx={{ fontSize: "large" }}
-                onClick={() => setAddToCartOpen(true)}
-              >
-                <Badge badgeContent={4} color="error">
-                  <ShoppingCartOutlinedIcon fontSize="large" />
-                </Badge>
-              </IconButton>
-              <Button className="text-gray-700" onClick={signOutClick}>
-                <LogoutIcon style={{ color: "white" }} fontSize="large" />
-              </Button>
+              {isAddToCartPage ? (
+                <Button
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    color: "white",
+                  }}
+                  onClick={() => router.push("/user")}
+                >
+                  <ArrowBackIcon />
+                  Back To home
+                </Button>
+              ) : (
+                <IconButton
+                  size="large"
+                  aria-label="show 4 new mails"
+                  color="inherit"
+                  sx={{ fontSize: "large" }}
+                  onClick={() => router.push("user/add-to-cart")}
+                >
+                  <Badge badgeContent={4} color="error">
+                    <ShoppingCartOutlinedIcon fontSize="large" />
+                  </Badge>
+                </IconButton>
+              )}
+              <Link href="/login">
+                <Button className="text-gray-700" onClick={signOutClick}>
+                  <LogoutIcon style={{ color: "white" }} fontSize="large" />
+                </Button>
+              </Link>
             </Box>
           </Toolbar>
         </AppBar>
