@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import { Button } from "react-scroll";
 import CloseIcon from "@mui/icons-material/Close";
 import ColorPalette from "@/utilis/colorPalette.";
-import ConfirmModal from "@/components/user/confirmModal/ConfirmModal";
+import ConfirmModal from "@/components/confirmModal/ConfirmModal";
 import UserNavBar from "@/components/user/navBar/UserNavbar";
 
 export default function AddToCart() {

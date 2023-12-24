@@ -1,5 +1,5 @@
 import React from "react";
-import CustomModal from "../../modal/CustomModal";
+
 import {
   Box,
   Button,
@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ColorPalette from "@/utilis/colorPalette.";
+import CustomModal from "../modal/CustomModal";
 
 const ConfirmModal = ({ modalOpen, onClose, setModalOpen, message }) => {
   return (

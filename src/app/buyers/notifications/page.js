@@ -17,38 +17,39 @@ import {
 import ColorPalette from "@/utilis/colorPalette.";
 import BuyerNavBar from "@/components/buyers/buyerNavBar/BuyerNavBar";
 import ConfirmModal from "@/components/confirmModal/ConfirmModal";
-import InvoiceModal from "@/components/buyers/invoiceModal/InvoiceModal";
 
 const Buyers = () => {
-  const [invoiceModal, setInvoiceModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [message, setMessage] = useState("");
 
   const testData = [
     {
-      username: "dixit dhakal",
-      location: "gatthaghar, bhaktapur",
+      username: "username 1",
+      location: "kathamandu",
       amount: "Rs 2000",
       items: ["newspaper: 20kg", "iron: 13kg"],
     },
     {
-      username: "dixit dhakal",
-      location: "gatthaghar, bhaktapur",
+      username: "username 2",
+      location: "Bhaktapur",
       amount: "Rs 2000",
       items: ["newspaper: 20kg", "iron: 13kg"],
     },
     {
-      username: "dixit dhakal",
-      location: "gatthaghar, bhaktapur",
+      username: "username3",
+      location: "Lalitpur",
       amount: "Rs 2000",
       items: ["newspaper: 20kg", "iron: 13kg"],
     },
   ];
   return (
     <div>
-      {invoiceModal && (
-        <InvoiceModal
-          modalOpen={invoiceModal}
-          onClose={() => setInvoiceModal(false)}
-          setModalOpen={setInvoiceModal}
+      {confirmModal && (
+        <ConfirmModal
+          modalOpen={confirmModal}
+          onClose={() => setConfirmModal(false)}
+          setModalOpen={setConfirmModal}
+          message={message}
         />
       )}
       <Box marginBottom={13}>
@@ -75,7 +76,7 @@ const Buyers = () => {
               color: ColorPalette.teal,
             }}
           >
-            Users order
+            Notifications
           </Typography>
           <TableContainer style={{ height: "60vh", overflowY: "scroll" }}>
             <Table>
@@ -97,6 +98,12 @@ const Buyers = () => {
                       </TableCell>
                     )
                   )}
+                  <TableCell>
+                    <Typography variant="body1" fontWeight="bold"></Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1" fontWeight="bold"></Typography>
+                  </TableCell>
                   <TableCell>
                     <Typography variant="body1" fontWeight="bold"></Typography>
                   </TableCell>
@@ -129,11 +136,12 @@ const Buyers = () => {
                       <Button
                         variant="contained"
                         style={{
-                          backgroundColor: ColorPalette.primary,
+                          backgroundColor: ColorPalette.teal,
                           borderRadius: "8px",
                         }}
                         onClick={() => {
-                          setInvoiceModal(true);
+                          setConfirmModal(true);
+                          setMessage("acpect order");
                         }}
                       >
                         <Typography
@@ -147,7 +155,34 @@ const Buyers = () => {
                             paddingX: "10px",
                           }}
                         >
-                          Invoice
+                          Accpect
+                        </Typography>
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        style={{
+                          backgroundColor: ColorPalette.danger,
+                          borderRadius: "8px",
+                        }}
+                        onClick={() => {
+                          setConfirmModal(true);
+                          setMessage("decline order");
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            color: "white",
+                            padding: "5px",
+                            paddingX: "10px",
+                          }}
+                        >
+                          Decline
                         </Typography>
                       </Button>
                     </TableCell>

@@ -15,15 +15,15 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { signOut } from "next-auth/react";
 
 import { Badge } from "@mui/material";
-import ColorPalette from "@/utilis/colorPalette.";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import UserNotificationModal from "../notification/UserNotificationModal";
+import { useState } from "react";
 
 export default function UserNavBar(props) {
   const router = useRouter();
-  const [isAddToCartPage, setIsAddToCartPage] = useState(false);
+  const [notificationModal, setNotificationModal] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -34,22 +34,15 @@ export default function UserNavBar(props) {
     sessionStorage.removeItem("role");
   };
 
-  useEffect(() => {
-    const checkPathname = () => {
-      setIsAddToCartPage(window.location.pathname === "/user/add-to-cart");
-    };
-
-    checkPathname();
-
-    window.addEventListener("popstate", checkPathname);
-
-    return () => {
-      window.removeEventListener("popstate", checkPathname);
-    };
-  }, []);
-
   return (
     <div>
+      {notificationModal && (
+        <UserNotificationModal
+          modalOpen={notificationModal}
+          onClose={() => setNotificationModal(false)}
+          setModalOpen={setNotificationModal}
+        />
+      )}
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <AppBar component="nav" sx={{ padding: 2, backgroundColor: "#008080" }}>
@@ -65,53 +58,45 @@ export default function UserNavBar(props) {
                 alignItems: "center",
               }}
             >
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                edge="start"
-                onClick={handleDrawerToggle}
-                sx={{ mr: 2, display: { sm: "none" }, fontSize: "large" }}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Typography
-                variant="h6"
-                component="div"
-                sx={{
-                  display: { xs: "none", sm: "block" },
-                  fontFamily: "Arial",
-                }}
-              >
-                Recycle Nepal
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: "40px" }}>
-              {isAddToCartPage ? (
-                <Button
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
+              <Button onClick={() => router.push("/user/")}>
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    fontFamily: "Arial",
                     color: "white",
                   }}
-                  onClick={() => router.push("/user")}
                 >
-                  <ArrowBackIcon />
-                  Back To home
-                </Button>
-              ) : (
-                <IconButton
-                  size="large"
-                  aria-label="show 4 new mails"
-                  color="inherit"
-                  sx={{ fontSize: "large" }}
-                  onClick={() => router.push("user/add-to-cart")}
-                >
-                  <Badge badgeContent={4} color="error">
-                    <ShoppingCartOutlinedIcon fontSize="large" />
-                  </Badge>
-                </IconButton>
-              )}
+                  Recycle Nepal
+                </Typography>
+              </Button>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: "40px" }}>
+              <IconButton
+                size="large"
+                aria-label="show 4 new mails"
+                color="inherit"
+                sx={{ fontSize: "large" }}
+                onClick={() => {
+                  setNotificationModal(true);
+                }}
+              >
+                <Badge badgeContent={4} color="error">
+                  <NotificationsIcon fontSize="large" />
+                </Badge>
+              </IconButton>
+              <IconButton
+                size="large"
+                aria-label="show 4 new mails"
+                color="inherit"
+                sx={{ fontSize: "large" }}
+                onClick={() => router.push("user/add-to-cart")}
+              >
+                <Badge badgeContent={4} color="error">
+                  <ShoppingCartOutlinedIcon fontSize="large" />
+                </Badge>
+              </IconButton>
               <Link href="/login">
                 <Button className="text-gray-700" onClick={signOutClick}>
                   <LogoutIcon style={{ color: "white" }} fontSize="large" />
