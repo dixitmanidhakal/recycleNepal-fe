@@ -18,6 +18,7 @@ import {
 import ColorPalette from "@/utilis/colorPalette.";
 import BuyerNavBar from "@/components/buyers/buyerNavBar/BuyerNavBar";
 import ConfirmModal from "@/components/confirmModal/ConfirmModal";
+import UserNavBar from "@/components/user/navBar/UserNavbar";
 
 const UserNotification = () => {
   const [confirmModal, setConfirmModal] = useState(false);
@@ -38,7 +39,7 @@ const UserNotification = () => {
         />
       )}
       <Box marginBottom={13}>
-        <BuyerNavBar />
+        <UserNavBar />
       </Box>
       <Grid>
         <Box

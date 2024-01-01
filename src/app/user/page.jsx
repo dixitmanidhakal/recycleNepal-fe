@@ -21,7 +21,6 @@ const User = () => {
   const handleTabChange = (newValue) => {
     setValue(newValue);
   };
-  console.log("value", value);
   return (
     <>
       <Grid container spacing={2}>

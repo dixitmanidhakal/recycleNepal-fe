@@ -55,7 +55,7 @@ export default function UserNavBar(props) {
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center",
+                alignItems: "center", 
               }}
             >
               <Button onClick={() => router.push("/user/")}>
