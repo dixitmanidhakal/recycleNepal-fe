@@ -7,11 +7,41 @@ import { Button, CardActionArea, CardActions, TextField } from "@mui/material";
 import Image from "next/image";
 import { Unstable_NumberInput as NumberInput } from "@mui/base/Unstable_NumberInput";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { addToCartEndpoint } from "@/services/routes/users/cart";
+import { useForm } from "react-hook-form";
 
 function CardComponent({ image, title, description, cost }) {
   const [inputQuantity, setInputQuantity] = useState();
+  console.log("input quaantity", inputQuantity);
   let total = cost * Number(inputQuantity);
 
+  //post req on sending cart
+  const { mutate, status } = useMutation({
+    mutationFn: async (data) => {
+      await handleRequest(addToCartEndpoint, "POST", data);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [""] });
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  const handleCartSubmit = () => {
+    const sendData = {
+      name: title,
+      quantity: inputQuantity,
+      unitPrice: cost,
+      total: total,
+    };
+    mutate(sendData);
+  };
   return (
     <Card
       sx={{
@@ -62,7 +92,7 @@ function CardComponent({ image, title, description, cost }) {
         </CardContent>
       </CardActionArea>
       <CardActions>
-        <Button size="small" color="primary">
+        <Button size="small" color="primary" onClick={handleCartSubmit}>
           Add To cart
         </Button>
       </CardActions>

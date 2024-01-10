@@ -90,9 +90,9 @@ const User = () => {
                     <Grid item key={index}>
                       <CardComponent
                         image={item.src}
-                        title={item.title}
+                        title={item.name}
                         description={item.description}
-                        cost={item.cost}
+                        cost={item.price}
                       />
                     </Grid>
                   ))}
@@ -104,7 +104,7 @@ const User = () => {
                     <Grid item key={index}>
                       <CardComponent
                         image={item.src}
-                        title={item.title}
+                        title={item.name}
                         description={item.description}
                         cost={item.cost}
                       />
@@ -118,7 +118,7 @@ const User = () => {
                     <Grid item key={index}>
                       <CardComponent
                         image={item.src}
-                        title={item.title}
+                        title={item.name}
                         description={item.description}
                         cost={item.cost}
                       />

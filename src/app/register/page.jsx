@@ -37,6 +37,7 @@ const fields = {
     "buyerLocation",
     "panNumber",
     "vehicle",
+    "capacity",
   ],
 };
 
@@ -74,7 +75,7 @@ const SelectField = ({ label, control, error, options, ...props }) => (
         )}
       />
     </FormControl>
-    {error && <Typography color="error">{error.message}</Typography>}
+    {/* {error && <Typography color="error">{error.message}</Typography>} */}
   </>
 );
 
@@ -127,12 +128,26 @@ const ItinerantBuyerForm = ({ register, control, errors, isSubmitted }) => (
       error={errors.panNumber}
       isSubmitted={isSubmitted}
     />
-    <SelectField
-      label="Select Vehicle"
-      control={control}
-      error={errors.vehicle}
-      options={["car", "bike"]}
-    />
+    <div className="flex gap-3">
+      <SelectField
+        label="vehicle"
+        control={control}
+        error={errors.vehicle}
+        options={[
+          "Two wheeler",
+          "pick-up truck",
+          "logistic truck",
+          "mini van",
+          "ricksaw",
+        ]}
+      />
+      <SelectField
+        label="capacity"
+        control={control}
+        error={errors.capacity}
+        options={[20, 50, 100, 500, 1000, 2000, 5000, 10000]}
+      />
+    </div>
   </>
 );
 
@@ -265,6 +280,7 @@ const StepperForm = () => {
         Location: location,
         "PAN Number": PAN,
         "select vehicle": vehicle,
+        "capacity": capacity,
         "First Name": firstName,
         "Last Name": lastName,
         Contact: contact,
@@ -282,7 +298,12 @@ const StepperForm = () => {
             company,
             location,
             PAN,
-            vehicle,
+            vehicle: [
+              {
+                model: vehicle,
+                maximumCapacity: capacity,
+              },
+            ],
           },
         };
       } else if (selectedRole === "User") {
@@ -299,6 +320,7 @@ const StepperForm = () => {
           },
         };
       }
+      console.log("formated data", formattedData);
 
       // Make the registration request
       const registrationResult = await mutate(formattedData);

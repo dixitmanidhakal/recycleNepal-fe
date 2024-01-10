@@ -15,8 +15,19 @@ import CloseIcon from "@mui/icons-material/Close";
 import ColorPalette from "@/utilis/colorPalette.";
 import ConfirmModal from "@/components/confirmModal/ConfirmModal";
 import UserNavBar from "@/components/user/navBar/UserNavbar";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCartEndpoint } from "@/services/routes/users/cart";
+import handleRequest from "@/services/apiHandler";
 
 export default function AddToCart() {
+  const queryClient = useQueryClient();
+
+  //searching and fetching client data
+  const { data: cartData, isLoading } = useQuery({
+    queryKey: ["addToCart"],
+    queryFn: async () => handleRequest(getCartEndpoint, "GET"),
+  });
+  console.log("cart data", cartData);
   const [confirmModal, setConfirmModal] = useState(false);
   const [message, setMessage] = useState("");
 
