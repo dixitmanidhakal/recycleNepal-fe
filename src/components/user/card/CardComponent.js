@@ -10,21 +10,12 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { addToCartEndpoint } from "@/services/routes/users/cart";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 
 function CardComponent({ image, title, description, cost }) {
   const [inputQuantity, setInputQuantity] = useState();
   console.log("input quaantity", inputQuantity);
   let total = cost * Number(inputQuantity);
-
-  //post req on sending cart
-  const { mutate, status } = useMutation({
-    mutationFn: async (data) => {
-      await handleRequest(addToCartEndpoint, "POST", data);
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: [""] });
-    },
-  });
 
   const {
     register,
@@ -33,15 +24,36 @@ function CardComponent({ image, title, description, cost }) {
     formState: { errors },
   } = useForm();
 
-  const handleCartSubmit = () => {
+  const handleCartSubmit = async () => {
     const sendData = {
-      name: title,
-      quantity: inputQuantity,
-      unitPrice: cost,
-      total: total,
+      cartItems: [
+        {
+          name: title,
+          quantity: inputQuantity,
+          unitPrice: cost,
+          total: total,
+        },
+      ],
     };
-    mutate(sendData);
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const { data } = await axios.post(
+        "http://localhost:4009/users/cart",
+        sendData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      console.log("success!!!");
+    } catch (error) {
+      console.log(error.message);
+    }
   };
+
   return (
     <Card
       sx={{

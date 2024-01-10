@@ -106,7 +106,8 @@ export default function AddToCart() {
           overflowY: "scroll",
         }}
       >
-        {data.map((item, index) => (
+        {!cartData && <h1>Loading...</h1>}
+        {cartData?.map((item, index) => (
           <div
             container
             key={index}
@@ -119,13 +120,13 @@ export default function AddToCart() {
             }}
           >
             <FormControlLabel control={<Checkbox />} label="" />
-            <Image src={item.image} height={100} width={200} alt="card image" />
+            {/* <Image src={item.image} height={100} width={200} alt="card image" /> */}
             <Grid
               container
               style={{ display: "flex", flexDirection: "column" }}
             >
               <Typography variant="h5" sx={{ color: ColorPalette.teal }}>
-                {item.title}
+                {item.name}
               </Typography>
               <Typography
                 variant="body2"
@@ -134,6 +135,9 @@ export default function AddToCart() {
                 sx={{ fontWeight: 600 }}
               >
                 quantity: {item.quantity}
+              </Typography>
+              <Typography marginTop={5} sx={{ fontWeight: 600 }}>
+                Price per Unit: {item.unitPrice}
               </Typography>
               <Typography marginTop={5} sx={{ fontWeight: 600 }}>
                 Total: {item.total}
