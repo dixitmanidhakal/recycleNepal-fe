@@ -25,6 +25,7 @@ export const options = {
     },
     async session({ session, token }) {
       session.user = token;
+      // sessionStorage.setItem("token", session);
       return session;
     },
   },

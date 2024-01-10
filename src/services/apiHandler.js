@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 const methods = {
   GET: axios.get,
@@ -9,7 +9,7 @@ const methods = {
 
 const handleRequest = async (
   endpoint,
-  method = 'POST',
+  method = "POST",
   requestBody = null,
   requestParams = null,
   // toastIdPrefix = '',
@@ -21,9 +21,10 @@ const handleRequest = async (
     if (!axiosMethod) {
       throw new Error(`Invalid HTTP method: ${method}`);
     }
-    const token = localStorage.getItem('access_token');
+    const token = sessionStorage.getItem("token");
+
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${JSON.parse(token)}`,
     };
 
     const response = await axios({
@@ -42,7 +43,7 @@ const handleRequest = async (
       if (successCallback && data) {
         successCallback(data);
       }
-      if (method !== 'GET' && !disabledNotification) {
+      if (method !== "GET" && !disabledNotification) {
         // thunkAPI.dispatch(
         //   showNotification({
         //     message: response.data.message,

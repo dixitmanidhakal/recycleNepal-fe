@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { signOut, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 
 export default function LoginForm() {
   const {
@@ -17,6 +18,9 @@ export default function LoginForm() {
   } = useForm();
 
   const { data: session } = useSession();
+  console.log("data", session?.user?.token);
+  // sessionStorage.setItem("token", session?.user?.token);
+  sessionStorage.setItem("token", JSON.stringify(session?.user?.token));
 
   const router = useRouter();
   const onSubmit = async (data, e) => {
@@ -26,15 +30,24 @@ export default function LoginForm() {
         ...data,
         redirect: false,
       });
+
       if (res?.error) {
         console.log(res.error);
         return;
       }
+
+      // Extract the access token from the session data
+      const accessToken = session?.user?.token;
+
       if (session && session.user && session.user.role) {
         if (session.user.role === "User") {
+          // You can use the accessToken as needed, for example, in API requests
+          console.log("Access Token:", accessToken);
+
           router.push("/user");
           return;
         }
+
         if (session.user.role === "Itinerant Buyers") {
           router.push("/buyers");
         }
