@@ -81,6 +81,7 @@ function ResponsiveAppBar() {
       sx={{
         backgroundColor: "#008080",
         display: showNavbar ? "block" : "none",
+        px: "45px",
       }}
     >
       <Toolbar disableGutters>
@@ -166,7 +167,7 @@ function ResponsiveAppBar() {
             </IconButton>
           </Tooltip>
           <Menu
-            sx={{ mt: "45px"}}
+            sx={{ mt: "45px" }}
             id="menu-appbar"
             anchorEl={anchorElUser}
             anchorOrigin={{
@@ -181,12 +182,12 @@ function ResponsiveAppBar() {
             open={Boolean(anchorElUser)}
             onClose={handleCloseUserMenu}
           >
-            <MenuItem key="Login"  onClick={handleCloseUserMenu}>
+            <MenuItem key="Login" onClick={handleCloseUserMenu}>
               <Link href="/login">
                 <Typography textAlign="center">Login</Typography>
               </Link>
             </MenuItem>
-            <MenuItem key="Register"  onClick={handleCloseUserMenu}>
+            <MenuItem key="Register" onClick={handleCloseUserMenu}>
               <Link href="/register">
                 <Typography textAlign="center">Register</Typography>
               </Link>
