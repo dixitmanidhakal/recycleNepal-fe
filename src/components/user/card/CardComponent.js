@@ -1,28 +1,61 @@
 import * as React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { Button, CardActionArea, CardActions, TextField } from "@mui/material";
 import Image from "next/image";
-import { Unstable_NumberInput as NumberInput } from "@mui/base/Unstable_NumberInput";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { addToCartEndpoint } from "@/services/routes/users/cart";
-import { useForm } from "react-hook-form";
 import axios from "axios";
 
 function CardComponent({ image, title, description, cost }) {
   const [inputQuantity, setInputQuantity] = useState();
-  console.log("input quaantity", inputQuantity);
   let total = cost * Number(inputQuantity);
+  let itemVolume;
+  console.log("Title", title);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+  switch (title) {
+    case "newspaper":
+      itemVolume = "medium";
+      break;
+    case "books":
+      itemVolume = "medium";
+      break;
+    case "cartoon-box":
+      itemVolume = "high";
+      break;
+    case "cards":
+      itemVolume = "low";
+      break;
+    case "cd":
+      itemVolume = "medium";
+      break;
+    case "disinfectant-bottle":
+      itemVolume = "high";
+      break;
+    case "Liquor bottle":
+      itemVolume = "medium";
+      break;
+    case "shampoo-bottle":
+      itemVolume = "high";
+      break;
+    case "aluminium caans":
+      itemVolume = "low";
+      break;
+    case "brass":
+      itemVolume = "low";
+      break;
+    case "steel":
+      itemVolume = "low";
+      break;
+    case "Computer":
+      itemVolume = "low";
+      break;
+    case "scrap vehicles":
+      itemVolume = "low";
+      break;
+    default:
+      break;
+  }
 
   const handleCartSubmit = async () => {
     const sendData = {
@@ -32,9 +65,11 @@ function CardComponent({ image, title, description, cost }) {
           quantity: inputQuantity,
           unitPrice: cost,
           total: total,
+          volume: itemVolume,
         },
       ],
     };
+    console.log("send data", sendData);
     const token = sessionStorage.getItem("token");
 
     try {
@@ -66,7 +101,7 @@ function CardComponent({ image, title, description, cost }) {
         alignItems: "center",
         justifyContent: "center",
         maxHeight: "550px",
-        paddingBottom: "20px",
+        paddingBottom: "30px",
       }}
     >
       <CardActionArea>

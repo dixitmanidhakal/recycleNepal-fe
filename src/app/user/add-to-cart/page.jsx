@@ -11,64 +11,97 @@ import {
 import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "react-scroll";
-import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
 import ColorPalette from "@/utilis/colorPalette.";
 import ConfirmModal from "@/components/confirmModal/ConfirmModal";
 import UserNavBar from "@/components/user/navBar/UserNavbar";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCartEndpoint } from "@/services/routes/users/cart";
 import handleRequest from "@/services/apiHandler";
+import { useSession } from "next-auth/react";
 
 export default function AddToCart() {
-  const queryClient = useQueryClient();
+  const session = useSession();
+  const [checkedItems, setCheckedItems] = useState({});
 
   //searching and fetching client data
   const { data: cartData, isLoading } = useQuery({
     queryKey: ["addToCart"],
     queryFn: async () => handleRequest(getCartEndpoint, "GET"),
   });
-  console.log("cart data", cartData);
+
+  const handleChange = (id) => {
+    setCheckedItems((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleSelectData = async (id) => {
+    console.log("sessiion id", session?.data?.user?._id, id);
+
+    const sendData = {
+      purchased: checkedItems[id] || false,
+    };
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const { data } = await axios.put(
+        `http://localhost:4009/users/cart/${session?.data?.user?._id}/${id}`,
+        sendData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      console.log("success!!!");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const handleDeleteData = async (id) => {
+    const token = sessionStorage.getItem("token");
+    try {
+      const { data } = await axios.delete(
+        `http://localhost:4009/users/cart/${session?.data?.user?._id}/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      console.log("success!!!");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const submitOrder = async () => {
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const { data } = await axios.post(
+        `http://localhost:4009/orders/createOrder/${session?.data?.user?._id}`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      console.log("success!!!");
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   const [confirmModal, setConfirmModal] = useState(false);
   const [message, setMessage] = useState("");
-
-  // Sample data
-  const data = [
-    {
-      title: "newspaper",
-      quantity: "5kg",
-      price: "Rs10",
-      total: "Rs100",
-      image: "/images/paper/newspaper.jpg",
-    },
-    {
-      title: "newspaper",
-      quantity: "6kg",
-      price: "Rs12",
-      total: "Rs 120",
-      image: "/images/paper/newspaper.jpg",
-    },
-    {
-      title: "newspaper",
-      quantity: "7kg",
-      price: "Rs14",
-      total: "Rs140",
-      image: "/images/paper/newspaper.jpg",
-    },
-    {
-      title: "newspaper",
-      quantity: "8kg",
-      price: "Rs16",
-      total: "Rs160",
-      image: "/images/paper/newspaper.jpg",
-    },
-    {
-      title: "newspaper",
-      quantity: "9kg",
-      price: "Rs18",
-      total: "Rs180",
-      image: "/images/paper/newspaper.jpg",
-    },
-  ];
 
   return (
     <div className="p-10">
@@ -119,7 +152,14 @@ export default function AddToCart() {
               padding: "30px",
             }}
           >
-            <FormControlLabel control={<Checkbox />} label="" />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkedItems[item._id] || false}
+                  onChange={() => handleChange(item._id)}
+                />
+              }
+            />
             {/* <Image src={item.image} height={100} width={200} alt="card image" /> */}
             <Grid
               container
@@ -136,16 +176,65 @@ export default function AddToCart() {
               >
                 quantity: {item.quantity}
               </Typography>
-              <Typography marginTop={5} sx={{ fontWeight: 600 }}>
+              <Typography marginTop={1} sx={{ fontWeight: 600 }}>
                 Price per Unit: {item.unitPrice}
               </Typography>
-              <Typography marginTop={5} sx={{ fontWeight: 600 }}>
+              <Typography marginTop={1} sx={{ fontWeight: 600 }}>
                 Total: {item.total}
               </Typography>
             </Grid>
-            <Button>
-              <CloseIcon />
-            </Button>
+            <Grid
+              item
+              sx={{ display: "flex", alignItems: "center", gap: "10px" }}
+            >
+              <Button
+                variant="contained"
+                style={{
+                  backgroundColor: ColorPalette.teal,
+                  borderRadius: "8px",
+                  width: "60px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onClick={() => handleSelectData(item?._id)}
+              >
+                <Typography
+                  variant="body1"
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    color: "white",
+                    padding: "5px",
+                  }}
+                >
+                  Add
+                </Typography>
+              </Button>
+              <Button
+                variant="contained"
+                style={{
+                  backgroundColor: ColorPalette.danger,
+                  borderRadius: "8px",
+                }}
+                onClick={() => handleDeleteData(item?.id)}
+              >
+                <Typography
+                  variant="body1"
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    color: "white",
+                    padding: "5px",
+                    paddingX: "10px",
+                  }}
+                >
+                  Delete
+                </Typography>
+              </Button>
+            </Grid>
             <Divider sx={{ color: "black" }} />
           </div>
         ))}
@@ -163,10 +252,7 @@ export default function AddToCart() {
           <Button
             variant="contained"
             style={{ backgroundColor: ColorPalette.teal, borderRadius: "8px" }}
-            onClick={() => {
-              setConfirmModal(true);
-              setMessage("place order");
-            }}
+            onClick={submitOrder}
           >
             <Typography
               variant="h6"
@@ -179,33 +265,6 @@ export default function AddToCart() {
               }}
             >
               Place order
-            </Typography>
-          </Button>
-        </Grid>
-        <Grid item>
-          <Button
-            variant="contained"
-            style={{
-              backgroundColor: ColorPalette.danger,
-              borderRadius: "8px",
-            }}
-            onClick={() => {
-              setConfirmModal(true);
-              setMessage("cancel");
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                color: "white",
-                padding: "5px",
-                paddingX: "10px",
-              }}
-            >
-              Cancel
             </Typography>
           </Button>
         </Grid>
