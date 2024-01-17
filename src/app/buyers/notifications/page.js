@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-scroll";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   Box,
   Grid,
@@ -17,31 +17,65 @@ import {
 import ColorPalette from "@/utilis/colorPalette.";
 import BuyerNavBar from "@/components/buyers/buyerNavBar/BuyerNavBar";
 import ConfirmModal from "@/components/confirmModal/ConfirmModal";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 const Buyers = () => {
   const [confirmModal, setConfirmModal] = useState(false);
   const [message, setMessage] = useState("");
+  const [acceptedOrders, setAcceptedOrders] = useState([]);
 
-  const testData = [
-    {
-      username: "username 1",
-      location: "kathamandu",
-      amount: "Rs 2000",
-      items: ["newspaper: 20kg", "iron: 13kg"],
-    },
-    {
-      username: "username 2",
-      location: "Bhaktapur",
-      amount: "Rs 2000",
-      items: ["newspaper: 20kg", "iron: 13kg"],
-    },
-    {
-      username: "username3",
-      location: "Lalitpur",
-      amount: "Rs 2000",
-      items: ["newspaper: 20kg", "iron: 13kg"],
-    },
-  ];
+  const token = sessionStorage.getItem("token");
+  const session = useSession();
+
+  const fetchOrderList = async () => {
+    const response = await axios.get(
+      `http://localhost:4009/orders/getOrderList/${session?.data?.user?._id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${JSON.parse(token)}`,
+        },
+      }
+    );
+    return response.data;
+  };
+
+  const { data: orderList, isLoading } = useQuery({
+    queryKey: ["orderList"],
+    queryFn: fetchOrderList,
+    enabled: !!token && !!session?.data?.user?._id,
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+
+  const handleSelectData = async (id) => {
+    const sendData = {
+      isComplete: true,
+    };
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const { data } = await axios.post(
+        `http://localhost:4009/orders/accpectedOrder/${session?.data?.user?._id}`,
+        sendData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      console.log("success!!!");
+      setAcceptedOrders([...acceptedOrders, id]);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <div>
       {confirmModal && (
@@ -89,15 +123,13 @@ const Buyers = () => {
                 }}
               >
                 <TableRow sx={{ borderBottom: "2px solid #ccc" }}>
-                  {["R.N.", "User Name", "Location", "Amount", "Items"].map(
-                    (header) => (
-                      <TableCell key={header}>
-                        <Typography variant="body1" fontWeight="bold">
-                          {header}
-                        </Typography>
-                      </TableCell>
-                    )
-                  )}
+                  {["User Name", "Location", "Items"].map((header) => (
+                    <TableCell key={header}>
+                      <Typography variant="h6" fontWeight="bold">
+                        {header}
+                      </Typography>
+                    </TableCell>
+                  ))}
                   <TableCell>
                     <Typography variant="body1" fontWeight="bold"></Typography>
                   </TableCell>
@@ -110,82 +142,113 @@ const Buyers = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {testData?.map((row, index) => (
+                {orderList?.orders?.map((row, index) => (
                   <TableRow
                     key={index}
                     sx={{ borderBottom: "3px solid #e6fafa" }}
                   >
-                    <TableCell>{index}</TableCell>
-                    <TableCell>{row.username}</TableCell>
-                    <TableCell>{row.location}</TableCell>
-                    <TableCell>{row.amount}</TableCell>
-                    {row.items.map((item, index) => (
-                      <TableCell
-                        key={index}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          borderBottom: 0,
-                        }}
-                      >
-                        {item}
-                      </TableCell>
-                    ))}
+                    <TableCell>
+                      <Typography variant="body1">
+                        {row?.userInfo?.firstName +
+                          "" +
+                          row?.userInfo?.lastName}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">
+                        {row?.userInfo?.location}
+                      </Typography>
+                    </TableCell>
 
                     <TableCell>
-                      <Button
-                        variant="contained"
-                        style={{
-                          backgroundColor: ColorPalette.teal,
-                          borderRadius: "8px",
-                        }}
-                        onClick={() => {
-                          setConfirmModal(true);
-                          setMessage("acpect order");
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            color: "white",
-                            padding: "5px",
-                            paddingX: "10px",
-                          }}
-                        >
-                          Accpect
-                        </Typography>
-                      </Button>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            {[
+                              "Volume",
+                              "Item",
+                              "Quantity",
+                              "Price",
+                              "Total",
+                            ].map((header) => (
+                              <TableCell key={header}>
+                                <Typography variant="body1" fontWeight="bold">
+                                  {header}
+                                </Typography>
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {row?.orderDetails?.map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{item?.volume}</TableCell>
+                              <TableCell>{item?.details?.name}</TableCell>
+                              <TableCell>{item?.details?.quantity}</TableCell>
+                              <TableCell>{item?.details?.unitPrice}</TableCell>
+                              <TableCell>{item?.details?.total}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        style={{
-                          backgroundColor: ColorPalette.danger,
-                          borderRadius: "8px",
-                        }}
-                        onClick={() => {
-                          setConfirmModal(true);
-                          setMessage("decline order");
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            color: "white",
-                            padding: "5px",
-                            paddingX: "10px",
-                          }}
-                        >
-                          Decline
-                        </Typography>
-                      </Button>
-                    </TableCell>
+                    {!acceptedOrders.includes(row._id) && (
+                      <>
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            style={{
+                              backgroundColor: ColorPalette.teal,
+                              borderRadius: "8px",
+                            }}
+                            onClick={() => {
+                              handleSelectData(row._id);
+                            }}
+                          >
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                color: "white",
+                                padding: "5px",
+                                paddingX: "10px",
+                              }}
+                            >
+                              Accept
+                            </Typography>
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            style={{
+                              backgroundColor: ColorPalette.danger,
+                              borderRadius: "8px",
+                            }}
+                            onClick={() => {
+                              setConfirmModal(true);
+                              setMessage("decline order");
+                            }}
+                          >
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                color: "white",
+                                padding: "5px",
+                                paddingX: "10px",
+                              }}
+                            >
+                              Decline
+                            </Typography>
+                          </Button>
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

@@ -14,6 +14,11 @@ import {
   metalItems,
   paperItems,
 } from "@/utilis/itemsData";
+import { useSession } from "next-auth/react";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import handleRequest from "@/services/apiHandler";
+import { getCartEndpoint } from "@/services/routes/users/cart";
 
 const User = () => {
   const [value, setValue] = useState("1");
@@ -21,11 +26,55 @@ const User = () => {
   const handleTabChange = (newValue) => {
     setValue(newValue);
   };
+  const token = sessionStorage.getItem("token");
+  const session = useSession();
+
+  const userNotification = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4009/orders/user/orderNotification/${session?.data?.user?._id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching completed order:", error);
+      throw error; // Re-throw the error to let React Query handle it
+    }
+  };
+
+  const {
+    data: notification,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["completeOrder"],
+    queryFn: userNotification,
+    enabled: !!token && !!session?.data?.user?._id,
+  });
+
+  //searching and fetching client data
+  const { data: cartData } = useQuery({
+    queryKey: ["addToCart"],
+    queryFn: async () => handleRequest(getCartEndpoint, "GET"),
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const notificationBadge = notification?.orders?.length;
+  const cartBadge = cartData?.length;
+
   return (
     <>
       <Grid container spacing={2}>
         <Grid item>
-          <UserNavBar />
+          <UserNavBar notificationBadge={notificationBadge} cartBadge={cartBadge} />
         </Grid>
       </Grid>
       <Grid container>

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 
 export default function UserNotificationModal(props) {
   const router = useRouter();
+  const data = props.data;
 
   const handleClose = () => {
     props.setModalOpen(false);
@@ -93,10 +94,17 @@ export default function UserNotificationModal(props) {
                   },
                 }}
               >
-                <Typography>
-                  {buyer.name} accpected your buy request from
-                  {buyer.location}
-                </Typography>
+                {data?.orders?.map((item, index) => (
+                  <div>
+                    {item?.buyerDetails?.map((buyer) => (
+                      <Typography key={index}>
+                        {console.log("ITems", item)}
+                        {buyer?.company} accepted your buy request from{" "}
+                        {buyer?.location}
+                      </Typography>
+                    ))}
+                  </div>
+                ))}
                 <Divider />
               </Box>
             </Grid>

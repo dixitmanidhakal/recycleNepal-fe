@@ -33,6 +33,7 @@ export default function UserNavBar(props) {
     signOut();
     sessionStorage.removeItem("role");
   };
+  const badge = props.data?.orders;
 
   return (
     <div>
@@ -41,6 +42,7 @@ export default function UserNavBar(props) {
           modalOpen={notificationModal}
           onClose={() => setNotificationModal(false)}
           setModalOpen={setNotificationModal}
+          data={props.data}
         />
       )}
       <Box sx={{ display: "flex" }}>
@@ -55,7 +57,7 @@ export default function UserNavBar(props) {
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center", 
+                alignItems: "center",
               }}
             >
               <Button onClick={() => router.push("/user/")}>
@@ -82,7 +84,7 @@ export default function UserNavBar(props) {
                   setNotificationModal(true);
                 }}
               >
-                <Badge badgeContent={4} color="error">
+                <Badge badgeContent={props.notificationBadge} color="error">
                   <NotificationsIcon fontSize="large" />
                 </Badge>
               </IconButton>
@@ -93,7 +95,7 @@ export default function UserNavBar(props) {
                 sx={{ fontSize: "large" }}
                 onClick={() => router.push("user/add-to-cart")}
               >
-                <Badge badgeContent={4} color="error">
+                <Badge badgeContent={props.cartBadge} color="error">
                   <ShoppingCartOutlinedIcon fontSize="large" />
                 </Badge>
               </IconButton>

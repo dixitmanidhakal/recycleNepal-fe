@@ -12,7 +12,7 @@ import Button from "@mui/material/Button";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,11 +20,12 @@ import { useState, useEffect } from "react";
 import ColorPalette from "@/utilis/colorPalette.";
 import { Badge, Grid, formLabelClasses } from "@mui/material";
 import NotificationModal from "@/components/buyers/notification/notificationModal/NotificationModal";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import axios from "axios";
 
 export default function BuyerNavBar(props) {
   const router = useRouter();
   const [notificationModal, setNotificationModal] = useState(false);
+  const [orderList, setOrderList] = useState(null);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -35,6 +36,28 @@ export default function BuyerNavBar(props) {
     sessionStorage.removeItem("role");
   };
 
+  const token = sessionStorage.getItem("token");
+  const session = useSession();
+
+  useEffect(() => {
+    const fetchOrderList = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:4009/orders/getOrderList/${session?.data?.user?._id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${JSON.parse(token)}`,
+            },
+          }
+        );
+        setOrderList(response.data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    fetchOrderList();
+  }, [session, token]);
   return (
     <div>
       {notificationModal && (
@@ -42,6 +65,7 @@ export default function BuyerNavBar(props) {
           modalOpen={notificationModal}
           onClose={() => setNotificationModal(false)}
           setModalOpen={setNotificationModal}
+          orderData={orderList}
         />
       )}
 
@@ -109,7 +133,7 @@ export default function BuyerNavBar(props) {
                     setNotificationModal(true);
                   }}
                 >
-                  <Badge badgeContent={4} color="error">
+                  <Badge badgeContent={orderList?.orders?.length} color="error">
                     <NotificationsIcon fontSize="large" />
                   </Badge>
                 </IconButton>

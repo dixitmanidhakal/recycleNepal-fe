@@ -23,6 +23,32 @@ import { useSession } from "next-auth/react";
 export default function AddToCart() {
   const session = useSession();
   const [checkedItems, setCheckedItems] = useState({});
+  const token = sessionStorage.getItem("token");
+
+  //user notification
+  const userNotification = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4009/orders/user/orderNotification/${session?.data?.user?._id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching completed order:", error);
+      throw error; // Re-throw the error to let React Query handle it
+    }
+  };
+
+  const { data: notification, error } = useQuery({
+    queryKey: ["completeOrder"],
+    queryFn: userNotification,
+    enabled: !!token && !!session?.data?.user?._id,
+  });
 
   //searching and fetching client data
   const { data: cartData, isLoading } = useQuery({
@@ -102,6 +128,8 @@ export default function AddToCart() {
 
   const [confirmModal, setConfirmModal] = useState(false);
   const [message, setMessage] = useState("");
+  const cartBadge = cartData?.length;
+  const notificationBadge = notification?.orders?.length;
 
   return (
     <div className="p-10">
@@ -113,7 +141,7 @@ export default function AddToCart() {
           message={message}
         />
       )}
-      <UserNavBar />
+      <UserNavBar cartBadge={cartBadge} notificationBadge={notificationBadge} />
 
       <Typography
         variant="h3"

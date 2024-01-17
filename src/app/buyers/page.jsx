@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "react-scroll";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   Box,
   Grid,
@@ -13,35 +13,54 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  fabClasses,
 } from "@mui/material";
 import ColorPalette from "@/utilis/colorPalette.";
 import BuyerNavBar from "@/components/buyers/buyerNavBar/BuyerNavBar";
 import ConfirmModal from "@/components/confirmModal/ConfirmModal";
 import InvoiceModal from "@/components/buyers/invoiceModal/InvoiceModal";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const Buyers = () => {
   const [invoiceModal, setInvoiceModal] = useState(false);
 
-  const testData = [
-    {
-      username: "dixit dhakal",
-      location: "gatthaghar, bhaktapur",
-      amount: "Rs 2000",
-      items: ["newspaper: 20kg", "iron: 13kg"],
-    },
-    {
-      username: "dixit dhakal",
-      location: "gatthaghar, bhaktapur",
-      amount: "Rs 2000",
-      items: ["newspaper: 20kg", "iron: 13kg"],
-    },
-    {
-      username: "dixit dhakal",
-      location: "gatthaghar, bhaktapur",
-      amount: "Rs 2000",
-      items: ["newspaper: 20kg", "iron: 13kg"],
-    },
-  ];
+  const token = sessionStorage.getItem("token");
+  const session = useSession();
+
+  
+
+
+  const completedOrder = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4009/orders/buyer/orderNotification/${session?.data?.user?._id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JSON.parse(token)}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching completed order:", error);
+      throw error; // Re-throw the error to let React Query handle it
+    }
+  };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["completeOrder"],
+    queryFn: completedOrder,
+    enabled: !!token && !!session?.data?.user?._id,
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+
+
   return (
     <div>
       {invoiceModal && (
@@ -49,6 +68,7 @@ const Buyers = () => {
           modalOpen={invoiceModal}
           onClose={() => setInvoiceModal(false)}
           setModalOpen={setInvoiceModal}
+          data={data}
         />
       )}
       <Box marginBottom={13}>
@@ -88,7 +108,7 @@ const Buyers = () => {
                 }}
               >
                 <TableRow sx={{ borderBottom: "2px solid #ccc" }}>
-                  {["R.N.", "User Name", "Location", "Amount", "Items"].map(
+                  {["R.N.", "User Name", "Location"].map(
                     (header) => (
                       <TableCell key={header}>
                         <Typography variant="body1" fontWeight="bold">
@@ -103,16 +123,17 @@ const Buyers = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {testData?.map((row, index) => (
+                {data?.map((row, index) => (
                   <TableRow
                     key={index}
                     sx={{ borderBottom: "3px solid #e6fafa" }}
                   >
                     <TableCell>{index}</TableCell>
-                    <TableCell>{row.username}</TableCell>
-                    <TableCell>{row.location}</TableCell>
-                    <TableCell>{row.amount}</TableCell>
-                    {row.items.map((item, index) => (
+                    <TableCell>
+                      {row?.userDetails?.firstName + row?.userDetails?.lastName}
+                    </TableCell>
+                    <TableCell>{row?.userDetails?.location}</TableCell>
+                    {/* {row.items.map((item, index) => (
                       <TableCell
                         key={index}
                         sx={{
@@ -123,7 +144,7 @@ const Buyers = () => {
                       >
                         {item}
                       </TableCell>
-                    ))}
+                    ))} */}
 
                     <TableCell>
                       <Button

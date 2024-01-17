@@ -15,6 +15,8 @@ import ColorPalette from "@/utilis/colorPalette.";
 import { useRouter } from "next/navigation";
 
 export default function NotificationModal(props) {
+  console.log("orders", props.orderData);
+  const orderData = props.orderData;
   const router = useRouter();
 
   const handleClose = () => {
@@ -89,7 +91,7 @@ export default function NotificationModal(props) {
               </IconButton>
             </Grid>
             <Grid item xs={12} ml={2} pr={2}>
-              {users.map((item, index) => (
+              {orderData?.orders?.map((item, index) => (
                 <Box
                   key={index}
                   sx={{
@@ -106,7 +108,8 @@ export default function NotificationModal(props) {
                   }}
                 >
                   <Typography>
-                    {item.name} sent you a buy request from {item.location}
+                    {item?.userInfo?.firstName + item?.userInfo?.lastName} sent
+                    you a buy request from {item?.userInfo?.location}
                   </Typography>
                   <Divider />
                 </Box>
