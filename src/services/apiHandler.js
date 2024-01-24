@@ -35,6 +35,7 @@ const handleRequest = async (
       params: requestParams,
     });
     let { data } = response.data;
+    console.log("response handlereq", response);
     if (data == null) {
       data = response.data;
     }

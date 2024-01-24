@@ -24,8 +24,9 @@ import handleRequest from "@/services/apiHandler";
 import { registerRoute } from "@/services/routes/auth";
 import { Link } from "react-scroll";
 import { signIn } from "next-auth/react";
+import axios from "axios";
 
-const steps = ["step1", "step2", "step3"];
+const steps = ["step1", "step2"];
 const fields = {
   step1: ["email", "password", "confirmPassword", "role"],
   step2: [
@@ -41,22 +42,20 @@ const fields = {
   ],
 };
 
-const FormField = ({ label, register, error, isSubmitted, ...props }) => (
+const FormField = ({ name, label, register, error, isSubmitted, ...props }) => (
   <>
     <TextField
       label={label}
       fullWidth
       margin="normal"
-      {...register(label, { required: `${label} is required`, ...props })}
+      {...register(name, { required: `${label} is required`, ...props })}
     />
-    {error && isSubmitted && (
-      <Typography color="error">{error.message}</Typography>
-    )}
+    {error && <Typography color="error">{error.message}</Typography>}
   </>
 );
 
 const SelectField = ({ label, control, error, options, ...props }) => (
-  <>
+  <div className="flex flex-col">
     <FormControl fullWidth margin="normal">
       <InputLabel>{label}</InputLabel>
       <Controller
@@ -75,31 +74,35 @@ const SelectField = ({ label, control, error, options, ...props }) => (
         )}
       />
     </FormControl>
-    {/* {error && <Typography color="error">{error.message}</Typography>} */}
-  </>
+    {error && <Typography color="error">{error.message}</Typography>}
+  </div>
 );
 
 const UserForm = ({ register, errors, isSubmitted }) => (
   <>
     <FormField
+      name="firstName"
       label="First Name"
       register={register}
       error={errors.firstName}
       isSubmitted={isSubmitted}
     />
     <FormField
+      name="lastName"
       label="Last Name"
       register={register}
       error={errors.lastName}
       isSubmitted={isSubmitted}
     />
     <FormField
+      name="contact"
       label="Contact"
       register={register}
       error={errors.contact}
       isSubmitted={isSubmitted}
     />
     <FormField
+      name="location"
       label="Location"
       register={register}
       error={errors.location}
@@ -111,18 +114,21 @@ const UserForm = ({ register, errors, isSubmitted }) => (
 const ItinerantBuyerForm = ({ register, control, errors, isSubmitted }) => (
   <>
     <FormField
+      name="companyName"
       label="Company Name"
       register={register}
       error={errors.companyName}
       isSubmitted={isSubmitted}
     />
     <FormField
+      name="buyerLocation"
       label="Location"
       register={register}
       error={errors.buyerLocation}
       isSubmitted={isSubmitted}
     />
     <FormField
+      name="panNumber"
       label="PAN Number"
       register={register}
       error={errors.panNumber}
@@ -165,6 +171,7 @@ const getStepContent = (
       return (
         <>
           <FormField
+            name="email"
             label="Email"
             register={register}
             error={errors.email}
@@ -172,6 +179,7 @@ const getStepContent = (
             pattern={/^\S+@\S+$/i}
           />
           <FormField
+            name="password"
             type="password"
             label="Password"
             register={register}
@@ -179,6 +187,7 @@ const getStepContent = (
             isSubmitted={isSubmitted}
           />
           <FormField
+            name="confirmPassword"
             type="password"
             label="Confirm Password"
             register={register}
@@ -205,6 +214,7 @@ const getStepContent = (
           register={register}
           errors={errors}
           isSubmitted={isSubmitted}
+          name={name}
         />
       ) : (
         <ItinerantBuyerForm
@@ -212,6 +222,7 @@ const getStepContent = (
           control={control}
           errors={errors}
           isSubmitted={isSubmitted}
+          name={name}
         />
       );
     default:
@@ -224,7 +235,7 @@ const StepperForm = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedRole, setSelectedRole] = useState("User");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const queryClient = useQueryClient();
+  const [axiosError, setAxiosError] = useState("");
 
   const {
     register,
@@ -242,6 +253,8 @@ const StepperForm = () => {
 
     if (isValid) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    } else {
+      console.log(errors); // Log errors to debug
     }
   };
 
@@ -253,104 +266,56 @@ const StepperForm = () => {
     setSelectedRole(event.target.value);
   };
 
-  const { mutate, error } = useMutation({
-    mutationFn: async (data) => {
-      queryClient.invalidateQueries({ queryKey: [""] });
-
-      await handleRequest(registerRoute, "POST", data);
-    },
-    onSuccess: () => {
-      setIsSubmitted(true);
-      router.push("/login");
-    },
-  });
-
-  // ... (other imports)
-
   const onSubmit = async (data) => {
-    try {
-      console.log("form data", data);
+    console.log("form data", data);
 
-      const {
-        Email: email,
-        Password: password,
-        "Confirm Password": confirmPassword,
-        selectedRole: role,
-        "Company Name": company,
-        Location: location,
-        "PAN Number": PAN,
-        "select vehicle": vehicle,
-        "capacity": capacity,
-        "First Name": firstName,
-        "Last Name": lastName,
-        Contact: contact,
-      } = data;
+    let formattedData;
 
-      let formattedData;
-
-      if (selectedRole === "Itinerant Buyers") {
-        formattedData = {
-          email,
-          password,
-          password_confirm: confirmPassword,
-          role: selectedRole,
-          otherFields: {
-            company,
-            location,
-            PAN,
-            vehicle: [
-              {
-                model: vehicle,
-                maximumCapacity: capacity,
-              },
-            ],
-          },
-        };
-      } else if (selectedRole === "User") {
-        formattedData = {
-          email,
-          password,
-          password_confirm: confirmPassword,
-          role: selectedRole,
-          otherFields: {
-            firstName,
-            lastName,
-            contact,
-            location,
-          },
-        };
-      }
-      console.log("formated data", formattedData);
-
-      // Make the registration request
-      const registrationResult = await mutate(formattedData);
-
-      // Check if registration was successful
-      if (registrationResult.data) {
-        // Update the session with the new token
-        const signInResult = await signIn("credentials", {
-          ...data, // You may need to adjust this based on your actual data structure
-          redirect: false,
-        });
-
-        // Check if signIn was successful
-        if (signInResult.data) {
-          console.log("New token after registration:", signInResult.data);
-          // Optionally, you can redirect the user or perform other actions here
-        } else {
-          console.error(
-            "Sign in after registration failed:",
-            signInResult.error
-          );
-        }
-      } else {
-        console.error("Registration failed:", registrationResult.error);
-      }
-
-      console.log("data", formattedData);
-    } catch (error) {
-      console.error("Error during registration:", error);
+    if (selectedRole === "Itinerant Buyers") {
+      formattedData = {
+        email: data.email,
+        password: data.password,
+        password_confirm: data.confirmPassword,
+        role: selectedRole,
+        otherFields: {
+          company: data.companyName,
+          location: data.buyerLocation,
+          PAN: data.panNumber,
+          vehicle: [
+            {
+              model: data.vehicle,
+              maximumCapacity: data.capacity,
+            },
+          ],
+        },
+      };
+    } else if (selectedRole === "User") {
+      formattedData = {
+        email: data.email,
+        password: data.password,
+        password_confirm: data.confirmPassword,
+        role: selectedRole,
+        otherFields: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          contact: data.contact,
+          location: data.location,
+        },
+      };
     }
+
+    console.log("formated data", formattedData);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4009/auth/register",
+        formattedData
+      );
+    } catch (error) {
+      setAxiosError(error.response.data.message);
+    }
+
+    console.log("success!!!", response);
   };
 
   const handleFinish = async (e) => {
@@ -358,8 +323,11 @@ const StepperForm = () => {
     const isValid = await trigger(fields[steps[activeStep]]);
 
     if (isValid) {
-      handleSubmit(onSubmit)();
-      // router.push("/login");
+      try {
+        await handleSubmit(onSubmit)();
+      } catch (error) {
+        console.error("Error during form submission:", error);
+      }
     }
   };
 
@@ -427,17 +395,13 @@ const StepperForm = () => {
                     variant="contained"
                     color="primary"
                     onClick={activeStep === 1 ? handleFinish : handleNext}
-                    disabled={
-                      !selectedRole ||
-                      (activeStep === 0 && Object.keys(errors).length > 0)
-                    }
                   >
                     {activeStep === 1 ? "Finish" : "Next"}
                   </Button>
-                  {error && (
-                    <div className="text-red-600">User already exists </div>
-                  )}
                 </div>
+                {axiosError && (
+                  <div className="text-red-600">{axiosError} </div>
+                )}
               </>
             )}
           </div>

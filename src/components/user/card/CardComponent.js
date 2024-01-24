@@ -9,6 +9,7 @@ import axios from "axios";
 
 function CardComponent({ image, title, description, cost }) {
   const [inputQuantity, setInputQuantity] = useState();
+  const [responseError, setResponseError] = useState();
   let total = cost * Number(inputQuantity);
   let itemVolume;
   console.log("Title", title);
@@ -85,6 +86,7 @@ function CardComponent({ image, title, description, cost }) {
       );
       console.log("success!!!");
     } catch (error) {
+      setResponseError(error.response.data.message);
       console.log(error.message);
     }
   };
@@ -133,6 +135,9 @@ function CardComponent({ image, title, description, cost }) {
               inputProps={{ min: 0 }}
             />
           </Typography>
+          {responseError && (
+            <div className="text-red-600">{responseError} </div>
+          )}
           <Typography variant="body1" color="text.secondary">
             <strong> Total:</strong> {total ? total : null}
           </Typography>

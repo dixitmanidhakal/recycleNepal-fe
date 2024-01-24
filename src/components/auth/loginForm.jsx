@@ -1,6 +1,12 @@
 "use client";
 
-import { Button, Grid, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Grid,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
@@ -8,23 +14,27 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { signOut, useSession } from "next-auth/react";
-import { getSession } from "next-auth/react";
+import { useState } from "react";
 
 export default function LoginForm() {
+  const [credentialError, setCredentialError] = useState("");
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
+    clearErrors,
     formState: { errors },
   } = useForm();
 
   const { data: session } = useSession();
-  console.log("data", session?.user?.token);
   // sessionStorage.setItem("token", session?.user?.token);
   sessionStorage.setItem("token", JSON.stringify(session?.user?.token));
 
   const router = useRouter();
   const onSubmit = async (data, e) => {
     e?.preventDefault();
+    setCredentialError("");
+    setLoading(true);
     try {
       const res = await signIn("credentials", {
         ...data,
@@ -32,7 +42,10 @@ export default function LoginForm() {
       });
 
       if (res?.error) {
-        console.log(res.error);
+        setCredentialError(
+          "Unable to login! Please check your credentials and confirm you have required privileges"
+        );
+        setLoading(false);
         return;
       }
 
@@ -53,7 +66,8 @@ export default function LoginForm() {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.log("error", error);
+      setLoading(false);
     }
   };
 
@@ -84,9 +98,10 @@ export default function LoginForm() {
       <div className="mt-12 flex w-1/2 flex-col gap-4">
         <TextField
           {...register("email", {
-            required: {
-              value: true,
-              message: "Email is required",
+            required: "Email is required",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Please enter a valid email",
             },
           })}
           fullWidth
@@ -111,15 +126,28 @@ export default function LoginForm() {
           label="Password"
           type="password"
           InputLabelProps={{ shrink: true }}
+          onInput={() => {
+            setCredentialError("");
+            clearErrors("password");
+          }}
         />
         {errors?.password && (
           <p className="text-xs text-red-600">{errors.password.message}</p>
         )}
       </div>
+      <div>
+        {credentialError && (
+          <p className="text-xs text-red-600"> {credentialError} </p>
+        )}
+      </div>
       <div className="mt-4 flex h-10 w-1/4 items-center justify-center rounded-md bg-teal-600 text-white hover:bg-teal-700">
-        <Button type="submit">
-          <Typography color="#ffffff">Login</Typography>
-        </Button>
+        {loading ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          <Button type="submit">
+            <Typography color="#ffffff">Login</Typography>
+          </Button>
+        )}
       </div>
       <Grid className="mt-3">
         <Link

@@ -24,10 +24,7 @@ export default function UserNotificationModal(props) {
       props.onClose();
     }
   };
-  const buyer = {
-    name: "buyer1",
-    location: "kathmandu",
-  };
+
 
   return (
     <Modal

@@ -74,7 +74,11 @@ const User = () => {
     <>
       <Grid container spacing={2}>
         <Grid item>
-          <UserNavBar notificationBadge={notificationBadge} cartBadge={cartBadge} />
+          <UserNavBar
+            notificationBadge={notificationBadge}
+            cartBadge={cartBadge}
+            data={notification}
+          />
         </Grid>
       </Grid>
       <Grid container>

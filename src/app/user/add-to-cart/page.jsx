@@ -15,7 +15,7 @@ import axios from "axios";
 import ColorPalette from "@/utilis/colorPalette.";
 import ConfirmModal from "@/components/confirmModal/ConfirmModal";
 import UserNavBar from "@/components/user/navBar/UserNavbar";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getCartEndpoint } from "@/services/routes/users/cart";
 import handleRequest from "@/services/apiHandler";
 import { useSession } from "next-auth/react";
@@ -49,6 +49,7 @@ export default function AddToCart() {
     queryFn: userNotification,
     enabled: !!token && !!session?.data?.user?._id,
   });
+  console.log("notification", notification);
 
   //searching and fetching client data
   const { data: cartData, isLoading } = useQuery({
@@ -64,7 +65,7 @@ export default function AddToCart() {
   };
 
   const handleSelectData = async (id) => {
-    console.log("sessiion id", session?.data?.user?._id, id);
+    console.log("sessiion id", session?.data);
 
     const sendData = {
       purchased: checkedItems[id] || false,
@@ -89,6 +90,7 @@ export default function AddToCart() {
   };
 
   const handleDeleteData = async (id) => {
+    console.log("delete id", id);
     const token = sessionStorage.getItem("token");
     try {
       const { data } = await axios.delete(
@@ -141,7 +143,11 @@ export default function AddToCart() {
           message={message}
         />
       )}
-      <UserNavBar cartBadge={cartBadge} notificationBadge={notificationBadge} />
+      <UserNavBar
+        data={notification}
+        cartBadge={cartBadge}
+        notificationBadge={notificationBadge}
+      />
 
       <Typography
         variant="h3"
@@ -246,7 +252,7 @@ export default function AddToCart() {
                   backgroundColor: ColorPalette.danger,
                   borderRadius: "8px",
                 }}
-                onClick={() => handleDeleteData(item?.id)}
+                onClick={() => handleDeleteData(item?._id)}
               >
                 <Typography
                   variant="body1"
