@@ -108,6 +108,9 @@ const UserNotification = () => {
               paddingY: "20px",
               borderRadius: "12px",
               boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
               "&:hover": {
                 backgroundColor: ColorPalette.grey,
               },
@@ -116,7 +119,9 @@ const UserNotification = () => {
             {data?.orders?.map((item, index) => (
               <div>
                 {item?.buyerDetails?.map((buyer) => (
-                  <Typography key={index}>
+                  <Typography
+                    key={index}
+                  >
                     {console.log("ITems", item)}
                     {buyer?.company} accepted your buy request from{" "}
                     {buyer?.location}

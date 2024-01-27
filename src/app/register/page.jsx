@@ -311,6 +311,7 @@ const StepperForm = () => {
         "http://localhost:4009/auth/register",
         formattedData
       );
+      router.push("/login");
     } catch (error) {
       setAxiosError(error.response.data.message);
     }
@@ -330,8 +331,6 @@ const StepperForm = () => {
       }
     }
   };
-
-  const onButtonClick = () => {};
 
   return (
     <div className="flex flex-col items-center text-center justify-center ">
@@ -407,7 +406,7 @@ const StepperForm = () => {
           </div>
           <Grid className="mt-4">
             <Button
-              onClick={onButtonClick}
+              onClick={() => router.push("/login")}
               sx={{
                 fontSize: "13px", // Adjust the font size as needed
                 color: "#008080", // Your desired text color

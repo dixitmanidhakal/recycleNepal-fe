@@ -34,7 +34,6 @@ export default function LoginForm() {
   const onSubmit = async (data, e) => {
     e?.preventDefault();
     setCredentialError("");
-    setLoading(true);
     try {
       const res = await signIn("credentials", {
         ...data,
@@ -56,13 +55,15 @@ export default function LoginForm() {
         if (session.user.role === "User") {
           // You can use the accessToken as needed, for example, in API requests
           console.log("Access Token:", accessToken);
-
           router.push("/user");
+          setLoading(true);
+
           return;
         }
 
         if (session.user.role === "Itinerant Buyers") {
           router.push("/buyers");
+          setLoading(true);
         }
       }
     } catch (error) {

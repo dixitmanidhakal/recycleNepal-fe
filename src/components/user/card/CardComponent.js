@@ -58,6 +58,11 @@ function CardComponent({ image, title, description, cost }) {
       break;
   }
 
+  const Onchange = (e) => {
+    setResponseError(null);
+    setInputQuantity(Number(e.target.value));
+  };
+
   const handleCartSubmit = async () => {
     const sendData = {
       cartItems: [
@@ -84,6 +89,7 @@ function CardComponent({ image, title, description, cost }) {
           },
         }
       );
+
       console.log("success!!!");
     } catch (error) {
       setResponseError(error.response.data.message);
@@ -94,7 +100,7 @@ function CardComponent({ image, title, description, cost }) {
   return (
     <Card
       sx={{
-        maxWidth: 345,
+        maxWidth: 360,
         padding: "30px",
         boxShadow: "5px 5px 15px rgba(0, 0, 0, 0.2)",
         marginTop: "20px",
@@ -102,8 +108,10 @@ function CardComponent({ image, title, description, cost }) {
         display: "flex-col",
         alignItems: "center",
         justifyContent: "center",
-        maxHeight: "550px",
+        height: "600px",
+        maxHeight: "600px",
         paddingBottom: "30px",
+        overflow: "auto",
       }}
     >
       <CardActionArea>
@@ -131,7 +139,7 @@ function CardComponent({ image, title, description, cost }) {
               size="small"
               type="number"
               value={inputQuantity}
-              onChange={(e) => setInputQuantity(Number(e.target.value))}
+              onChange={Onchange}
               inputProps={{ min: 0 }}
             />
           </Typography>

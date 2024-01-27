@@ -25,7 +25,6 @@ export default function UserNotificationModal(props) {
     }
   };
 
-
   return (
     <Modal
       open={props.modalOpen}
@@ -86,6 +85,9 @@ export default function UserNotificationModal(props) {
                   paddingY: "20px",
                   borderRadius: "12px",
                   boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "start",
                   "&:hover": {
                     backgroundColor: ColorPalette.grey,
                   },

@@ -24,6 +24,7 @@ export default function AddToCart() {
   const session = useSession();
   const [checkedItems, setCheckedItems] = useState({});
   const token = sessionStorage.getItem("token");
+  const [orderSuccessFull, setOrderSuccessFull] = useState(false);
 
   //user notification
   const userNotification = async () => {
@@ -122,6 +123,7 @@ export default function AddToCart() {
           },
         }
       );
+      setOrderSuccessFull("Order send Successfully");
       console.log("success!!!");
     } catch (error) {
       console.log(error.message);
@@ -301,6 +303,11 @@ export default function AddToCart() {
               Place order
             </Typography>
           </Button>
+          {orderSuccessFull && (
+            <Typography sx={{ color: ColorPalette.teal }}>
+              {orderSuccessFull}
+            </Typography>
+          )}
         </Grid>
       </Grid>
     </div>
